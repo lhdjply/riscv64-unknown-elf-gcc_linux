@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "GCOV 1"
-.TH GCOV 1 "2020-07-23" "gcc-10.2.0" "GNU"
+.TH GCOV 1 "2024-07-10" "gcc-14.1.1" "GNU"
 .SH "NAME"
 gcov \- coverage testing tool
 .SH "SYNOPSIS"
@@ -138,10 +138,11 @@ gcov [\fB\-v\fR|\fB\-\-version\fR] [\fB\-h\fR|\fB\-\-help\fR]
      [\fB\-a\fR|\fB\-\-all\-blocks\fR]
      [\fB\-b\fR|\fB\-\-branch\-probabilities\fR]
      [\fB\-c\fR|\fB\-\-branch\-counts\fR]
+     [\fB\-g\fR|\fB\-\-conditions\fR]
      [\fB\-d\fR|\fB\-\-display\-progress\fR]
      [\fB\-f\fR|\fB\-\-function\-summaries\fR]
-     [\fB\-i\fR|\fB\-\-json\-format\fR]
-     [\fB\-j\fR|\fB\-\-human\-readable\fR]
+     [\fB\-j\fR|\fB\-\-json\-format\fR]
+     [\fB\-H\fR|\fB\-\-human\-readable\fR]
      [\fB\-k\fR|\fB\-\-use\-colors\fR]
      [\fB\-l\fR|\fB\-\-long\-file\-names\fR]
      [\fB\-m\fR|\fB\-\-demangled\-names\fR]
@@ -239,6 +240,17 @@ be shown, unless the \fB\-u\fR option is given.
 .PD
 Write branch frequencies as the number of branches taken, rather than
 the percentage of branches taken.
+.IP "\fB\-g\fR" 4
+.IX Item "-g"
+.PD 0
+.IP "\fB\-\-conditions\fR" 4
+.IX Item "--conditions"
+.PD
+Write condition coverage to the output file, and write condition summary info
+to the standard output.  This option allows you to see if the conditions in
+your program at least once had an independent effect on the outcome of the
+boolean expression (modified condition/decision coverage).  This requires you
+to compile the source with \fB\-fcondition\-coverage\fR.
 .IP "\fB\-d\fR" 4
 .IX Item "-d"
 .PD 0
@@ -261,8 +273,8 @@ Output summaries for each function in addition to the file level summary.
 .PD
 Display help about using \fBgcov\fR (on the standard output), and
 exit without doing any further processing.
-.IP "\fB\-i\fR" 4
-.IX Item "-i"
+.IP "\fB\-j\fR" 4
+.IX Item "-j"
 .PD 0
 .IP "\fB\-\-json\-format\fR" 4
 .IX Item "--json-format"
@@ -276,11 +288,11 @@ Structure of the \s-1JSON\s0 is following:
 .Sp
 .Vb 7
 \&        {
-\&          "current_working_directory": <current_working_directory>,
-\&          "data_file": <data_file>,
-\&          "format_version": <format_version>,
-\&          "gcc_version": <gcc_version>
-\&          "files": [<file>]
+\&          "current_working_directory": "foo/bar",
+\&          "data_file": "a.out",
+\&          "format_version": "2",
+\&          "gcc_version": "11.1.1 20210510"
+\&          "files": ["$file"]
 \&        }
 .Ve
 .Sp
@@ -293,6 +305,14 @@ a compilation unit was compiled
 \&\fIdata_file\fR: name of the data file (\s-1GCDA\s0)
 .IP "\&*" 4
 \&\fIformat_version\fR: semantic version of the format
+.Sp
+Changes in version \fI2\fR:
+.RS 4
+.IP "\&*" 4
+\&\fIcalls\fR: information about function calls is added
+.RE
+.RS 4
+.RE
 .IP "\&*" 4
 \&\fIgcc_version\fR: version of the \s-1GCC\s0 compiler
 .RE
@@ -302,9 +322,9 @@ Each \fIfile\fR has the following form:
 .Sp
 .Vb 5
 \&        {
-\&          "file": <file_name>,
-\&          "functions": [<function>],
-\&          "lines": [<line>]
+\&          "file": "a.c",
+\&          "functions": ["$function"],
+\&          "lines": ["$line"]
 \&        }
 .Ve
 .Sp
@@ -318,15 +338,15 @@ Each \fIfunction\fR has the following form:
 .Sp
 .Vb 11
 \&        {
-\&          "blocks": <blocks>,
-\&          "blocks_executed": <blocks_executed>,
-\&          "demangled_name": "<demangled_name>,
-\&          "end_column": <end_column>,
-\&          "end_line": <end_line>,
-\&          "execution_count": <execution_count>,
-\&          "name": <name>,
-\&          "start_column": <start_column>
-\&          "start_line": <start_line>
+\&          "blocks": 2,
+\&          "blocks_executed": 2,
+\&          "demangled_name": "foo",
+\&          "end_column": 1,
+\&          "end_line": 4,
+\&          "execution_count": 1,
+\&          "name": "foo",
+\&          "start_column": 5,
+\&          "start_line": 1
 \&        }
 .Ve
 .Sp
@@ -359,18 +379,23 @@ this is likely to be fixed in the future.
 .Sp
 Each \fIline\fR has the following form:
 .Sp
-.Vb 7
+.Vb 10
 \&        {
-\&          "branches": [<branch>],
-\&          "count": <count>,
-\&          "line_number": <line_number>,
-\&          "unexecuted_block": <unexecuted_block>
-\&          "function_name": <function_name>,
+\&          "block_ids": ["$block_id"],
+\&          "branches": ["$branch"],
+\&          "calls": ["$call"],
+\&          "count": 2,
+\&          "conditions": ["$condition"],
+\&          "line_number": 15,
+\&          "unexecuted_block": false,
+\&          "function_name": "foo",
 \&        }
 .Ve
 .Sp
-Branches are present only with \fI\-b\fR option.
+Branches and calls are present only with \fI\-b\fR option.
 Fields of the \fIline\fR element have following semantics:
+.IP "\&*" 4
+\&\fIblock_ids\fR: IDs of basic blocks that belong to the line
 .IP "\&*" 4
 \&\fIcount\fR: number of executions of the line
 .IP "\&*" 4
@@ -386,11 +411,13 @@ Fields of the \fIline\fR element have following semantics:
 .Sp
 Each \fIbranch\fR has the following form:
 .Sp
-.Vb 5
+.Vb 7
 \&        {
-\&          "count": <count>,
-\&          "fallthrough": <fallthrough>,
-\&          "throw": <throw>
+\&          "count": 11,
+\&          "destination_block_id": 17,
+\&          "fallthrough": true,
+\&          "source_block_id": 13,
+\&          "throw": false
 \&        }
 .Ve
 .Sp
@@ -401,11 +428,59 @@ Fields of the \fIbranch\fR element have following semantics:
 \&\fIfallthrough\fR: true when the branch is a fall through branch
 .IP "\&*" 4
 \&\fIthrow\fR: true when the branch is an exceptional branch
+.IP "\&*" 4
+\&\fIisource_block_id\fR: \s-1ID\s0 of the basic block where this branch happens
+.IP "\&*" 4
+\&\fIdestination_block_id\fR: \s-1ID\s0 of the basic block this branch jumps to
+.RE
+.RS 4
+.Sp
+Each \fIcall\fR has the following form:
+.Sp
+.Vb 5
+\&        {
+\&          "destination_block_id": 1,
+\&          "returned": 11,
+\&          "source_block_id": 13
+\&        }
+.Ve
+.Sp
+Fields of the \fIcall\fR element have following semantics:
+.IP "\&*" 4
+\&\fIreturned\fR: number of times a function call returned (call count is equal
+to \fIline::count\fR)
+.IP "\&*" 4
+\&\fIisource_block_id\fR: \s-1ID\s0 of the basic block where this call happens
+.IP "\&*" 4
+\&\fIdestination_block_id\fR: \s-1ID\s0 of the basic block this calls continues after return
+.RE
+.RS 4
+.Sp
+Each \fIcondition\fR has the following form:
+.Sp
+.Vb 6
+\&        {
+\&          "count": 4,
+\&          "covered": 2,
+\&          "not_covered_false": [],
+\&          "not_covered_true": [0, 1],
+\&        }
+.Ve
+.Sp
+Fields of the \fIcondition\fR element have following semantics:
+.IP "\&*" 4
+\&\fIcount\fR: number of condition outcomes in this expression
+.IP "\&*" 4
+\&\fIcovered\fR: number of covered condition outcomes in this expression
+.IP "\&*" 4
+\&\fInot_covered_true\fR: terms, by index, not seen as true in this expression
+.IP "\&*" 4
+\&\fInot_covered_false\fR: terms, by index, not seen as false in this expression
 .RE
 .RS 4
 .RE
-.IP "\fB\-j\fR" 4
-.IX Item "-j"
+.IP "\fB\-H\fR" 4
+.IX Item "-H"
 .PD 0
 .IP "\fB\-\-human\-readable\fR" 4
 .IX Item "--human-readable"
@@ -635,8 +710,9 @@ will now produce a listing of the code along with frequency of execution
 for each line.  For example, if your program is called \fItmp.cpp\fR, this
 is what you see when you use the basic \fBgcov\fR facility:
 .PP
-.Vb 6
-\&        $ g++ --coverage tmp.cpp
+.Vb 7
+\&        $ g++ --coverage tmp.cpp -c
+\&        $ g++ --coverage tmp.o
 \&        $ a.out
 \&        $ gcov tmp.cpp -m
 \&        File 'tmp.cpp'
@@ -988,13 +1064,14 @@ same source lines, the line counts themselves might seem inconsistent.
 .PP
 Long-running applications can use the \f(CW\*(C`_\|_gcov_reset\*(C'\fR and \f(CW\*(C`_\|_gcov_dump\*(C'\fR
 facilities to restrict profile collection to the program region of
-interest. Calling \f(CW\*(C`_\|_gcov_reset(void)\*(C'\fR will clear all profile counters
-to zero, and calling \f(CW\*(C`_\|_gcov_dump(void)\*(C'\fR will cause the profile information
-collected at that point to be dumped to \fI.gcda\fR output files.
+interest. Calling \f(CW\*(C`_\|_gcov_reset(void)\*(C'\fR will clear all run-time profile
+counters to zero, and calling \f(CW\*(C`_\|_gcov_dump(void)\*(C'\fR will cause the profile
+information collected at that point to be dumped to \fI.gcda\fR output files.
 Instrumented applications use a static destructor with priority 99
 to invoke the \f(CW\*(C`_\|_gcov_dump\*(C'\fR function. Thus \f(CW\*(C`_\|_gcov_dump\*(C'\fR
 is executed after all user defined static destructors,
 as well as handlers registered with \f(CW\*(C`atexit\*(C'\fR.
+.PP
 If an executable loads a dynamic shared object via dlopen functionality,
 \&\fB\-Wl,\-\-dynamic\-list\-data\fR is needed to dump all profile data.
 .PP
@@ -1010,7 +1087,7 @@ to a misleading profile.
 \&\fIgpl\fR\|(7), \fIgfdl\fR\|(7), \fIfsf\-funding\fR\|(7), \fIgcc\fR\|(1) and the Info entry for \fIgcc\fR.
 .SH "COPYRIGHT"
 .IX Header "COPYRIGHT"
-Copyright (c) 1996\-2020 Free Software Foundation, Inc.
+Copyright (c) 1996\-2024 Free Software Foundation, Inc.
 .PP
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the \s-1GNU\s0 Free Documentation License, Version 1.3 or

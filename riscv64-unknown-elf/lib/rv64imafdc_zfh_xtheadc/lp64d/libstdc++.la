@@ -25,7 +25,7 @@ weak_library_names=''
 # Version information for libstdc++.
 current=6
 age=0
-revision=28
+revision=33
 
 # Is this an already installed library?
 installed=yes
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/mnt/ssd/jenkins_iotsw/slave/workspace/Toolchain/build-gnu-riscv/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V2.6.1/riscv64-unknown-elf/lib/rv64imafdc_zfh_xtheadc/lp64d'
+libdir='/flow/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V3.0.2/riscv64-unknown-elf/lib/rv64imafdc_zfh_xtheadc/lp64d'

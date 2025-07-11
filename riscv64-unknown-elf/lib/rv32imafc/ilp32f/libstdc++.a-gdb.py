@@ -1,5 +1,5 @@
 # -*- python -*-
-# Copyright (C) 2009-2020 Free Software Foundation, Inc.
+# Copyright (C) 2009-2024 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import gdb
 import os
 import os.path
 
-pythondir = '/mnt/ssd/jenkins_iotsw/slave/workspace/Toolchain/build-gnu-riscv/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V2.6.1/share/gcc-10.2.0/python'
-libdir = '/mnt/ssd/jenkins_iotsw/slave/workspace/Toolchain/build-gnu-riscv/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V2.6.1/riscv64-unknown-elf/lib/rv32imafc/ilp32f'
+pythondir = '/flow/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V3.0.2/share/gcc-14.1.1/python'
+libdir = '/flow/build-gcc-riscv64-unknown-elf/Xuantie-900-gcc-elf-newlib-x86_64-V3.0.2/riscv64-unknown-elf/lib/rv32imafc/ilp32f'
 
 # This file might be loaded when there is no current objfile.  This
 # can happen if the user loads it manually.  In this case we don't
